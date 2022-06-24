@@ -7,7 +7,8 @@ set(CMAKE_CXX_STANDARD 20)
 
 macro(add_app name)
     add_executable(${name} ${name}.cpp)
-    target_link_libraries(${name} z)
+    target_link_libraries(${name})
 endmacro()
 
 add_app(test_spoc_viewer)
+add_app(spoc_viewer)

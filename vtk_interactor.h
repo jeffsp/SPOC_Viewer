@@ -5,36 +5,35 @@
 #define vtkRenderingCore_AUTOINIT 4(vtkInteractionStyle,vtkRenderingFreeType,vtkRenderingFreeTypeOpenGL,vtkRenderingOpenGL)
 #define vtkRenderingVolume_AUTOINIT 1(vtkRenderingVolumeOpenGL)
 
-#include <vtkActor.h>
-#include <vtkCamera.h>
-#include <vtkCellArray.h>
-#include <vtkCubeSource.h>
-#include <vtkGlyph3D.h>
-#include <vtkLight.h>
-#include <vtkLightCollection.h>
-#include <vtkObjectFactory.h>
-#include <vtkPNGWriter.h>
-#include <vtkPointData.h>
-#include <vtkPointSource.h>
-#include <vtkPolyData.h>
-#include <vtkPolyDataMapper.h>
-#include <vtkPolygon.h>
-#include <vtkProperty.h>
-#include <vtkRenderWindow.h>
-#include <vtkRenderWindowInteractor.h>
-#include <vtkRenderer.h>
-#include <vtkSmartPointer.h>
-#include <vtkTextActor.h>
-#include <vtkTextProperty.h>
-#include <vtkVertexGlyphFilter.h>
-#include <vtkWindowToImageFilter.h>
-#include <vtkXOpenGLRenderWindow.h>
-#include <vtkXRenderWindowInteractor.h>
-#include <vtkInteractorStyleTrackballCamera.h>
+#include <vtk/vtkActor.h>
+#include <vtk/vtkCamera.h>
+#include <vtk/vtkCellArray.h>
+#include <vtk/vtkCubeSource.h>
+#include <vtk/vtkGlyph3D.h>
+#include <vtk/vtkLight.h>
+#include <vtk/vtkLightCollection.h>
+#include <vtk/vtkObjectFactory.h>
+#include <vtk/vtkPNGWriter.h>
+#include <vtk/vtkPointData.h>
+#include <vtk/vtkPointSource.h>
+#include <vtk/vtkPolyData.h>
+#include <vtk/vtkPolyDataMapper.h>
+#include <vtk/vtkPolygon.h>
+#include <vtk/vtkProperty.h>
+#include <vtk/vtkRenderWindow.h>
+#include <vtk/vtkRenderWindowInteractor.h>
+#include <vtk/vtkRenderer.h>
+#include <vtk/vtkSmartPointer.h>
+#include <vtk/vtkTextActor.h>
+#include <vtk/vtkTextProperty.h>
+#include <vtk/vtkVertexGlyphFilter.h>
+#include <vtk/vtkWindowToImageFilter.h>
+#include <vtk/vtkXOpenGLRenderWindow.h>
+#include <vtk/vtkXRenderWindowInteractor.h>
+#include <vtk/vtkInteractorStyleTrackballCamera.h>
 #include <sstream>
 
 #include "palette.h"
-#include "point_cloud.h"
 
 namespace vtk_interactor
 {

@@ -1,4 +1,4 @@
-default: help
+default: build
 
 .PHONY: cmake # Run cmake build
 cmake:
@@ -7,7 +7,8 @@ cmake:
 	cd build/debug && cmake -DCMAKE_BUILD_TYPE=Debug ../..
 	cd build/release && cmake -DCMAKE_BUILD_TYPE=Release ../..
 
-compile:
+.PHONY: build # Build application
+build:
 	cd build/debug && make -j 24
 	cd build/release && make -j 24
 

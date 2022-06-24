@@ -3,16 +3,9 @@
 #include <iostream>
 #include <stdexcept>
 #include <string>
-#include "app_utils.h"
-#include "shapefile.h"
 #include "cmd.h"
-#include "lasio.h"
-#include "lidar.h"
 #include "palette.h"
-#include "point_cloud.h"
-#include "point3d.h"
 #include "version.h"
-#include "voxel.h"
 
 #include "vtk_interactor.h"
 
