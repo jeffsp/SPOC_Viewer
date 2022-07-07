@@ -2,6 +2,9 @@ cmake_minimum_required(VERSION 3.14)
 
 project(spoc_viewer)
 
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_STANDARD 17)
+
 include(FetchContent)
 FetchContent_Declare(dlib
     GIT_REPOSITORY https://github.com/davisking/dlib.git
