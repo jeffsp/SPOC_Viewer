@@ -1,38 +1,64 @@
+#include <cmath>
 #include <dlib/gui_widgets.h>
 #include <dlib/image_transforms.h>
-#include <cmath>
+#include "spoc.h"
 
 using namespace dlib;
 using namespace std;
 
-// ----------------------------------------------------------------------------------------
+const std::string usage ("Usage: spoc_viewer input.spoc");
 
-int main()
+int main (int argc, char **argv)
 {
-    // Let's make a point cloud that looks like a 3D spiral.
-    std::vector<perspective_window::overlay_dot> points;
-    dlib::rand rnd;
-    for (double i = 0; i < 20; i+=0.001)
+    using namespace std;
+    using namespace spoc;
+
+    try
     {
-        // Get a point on a spiral
-        dlib::vector<double> val(sin(i),cos(i),i/4);
+        // Parse command line
+        if (argc != 2)
+            throw runtime_error (usage);
 
-        // Now add some random noise to it
-        dlib::vector<double> temp(rnd.get_random_gaussian(),
-                                  rnd.get_random_gaussian(),
-                                  rnd.get_random_gaussian());
-        val += temp/20;
+        // Read the input file
+        const string fn (argv[1]);
+        clog << "Reading " << fn << endl;
+        ifstream ifs (fn);
+        spoc_file f = read_spoc_file (ifs);
 
-        // Pick a color based on how far we are along the spiral
-        rgb_pixel color = colormap_jet(i,0,20);
+        ////////////////////////////////////////////////////
+        // Let's make a point cloud that looks like a 3D spiral.
+        std::vector<perspective_window::overlay_dot> points;
+        dlib::rand rnd;
+        for (double i = 0; i < 20; i+=0.001)
+        {
+            // Get a point on a spiral
+            dlib::vector<double> val(sin(i),cos(i),i/4);
 
-        // And add the point to the list of points we will display
-        points.push_back(perspective_window::overlay_dot(val, color));
+            // Now add some random noise to it
+            dlib::vector<double> temp(rnd.get_random_gaussian(),
+                                      rnd.get_random_gaussian(),
+                                      rnd.get_random_gaussian());
+            val += temp/20;
+
+            // Pick a color based on how far we are along the spiral
+            rgb_pixel color = colormap_jet(i,0,20);
+
+            // And add the point to the list of points we will display
+            points.push_back(perspective_window::overlay_dot(val, color));
+        }
+
+        // Now finally display the point cloud.
+        perspective_window win;
+        win.set_title("perspective_window 3D point cloud");
+        win.add_overlay(points);
+        win.wait_until_closed();
+        ////////////////////////////////////////////////////
+
+        return 0;
     }
-
-    // Now finally display the point cloud.
-    perspective_window win;
-    win.set_title("perspective_window 3D point cloud");
-    win.add_overlay(points);
-    win.wait_until_closed();
+    catch (const exception &e)
+    {
+        cerr << e.what () << endl;
+        return -1;
+    }
 }
