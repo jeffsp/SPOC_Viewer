@@ -12,4 +12,5 @@ FetchContent_Declare(dlib
 FetchContent_MakeAvailable(dlib)
 
 add_executable(spoc_viewer spoc_viewer.cpp)
+
 target_link_libraries(spoc_viewer dlib::dlib)

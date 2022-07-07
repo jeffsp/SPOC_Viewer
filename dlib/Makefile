@@ -5,8 +5,8 @@ default: build
 	@echo "Running cmake..."
 	@mkdir -p build/debug
 	@mkdir -p build/release
-	@cd build/debug && cmake -DCMAKE_BUILD_TYPE=Debug ../..
-	@cd build/release && cmake -DCMAKE_BUILD_TYPE=Release ../..
+	@cd build/debug && cmake -D CUDA_TOOLKIT_ROOT_DIR=/usr/local/cuda-11.7 -D CMAKE_BUILD_TYPE=Debug ../..
+	@cd build/release && cmake -D CUDA_TOOLKIT_ROOT_DIR=/usr/local/cuda-11.7 -D CMAKE_BUILD_TYPE=Release ../..
 
 .PHONY: build # Compile all applications
 build: ./build/debug/Makefile
