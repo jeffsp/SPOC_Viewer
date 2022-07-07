@@ -25,34 +25,23 @@ int main (int argc, char **argv)
         ifstream ifs (fn);
         spoc_file f = read_spoc_file (ifs);
 
-        ////////////////////////////////////////////////////
-        // Let's make a point cloud that looks like a 3D spiral.
+        // Get the xyz's
+        const auto p = f.get_point_records ();
+
+        // Stuff them into points
         std::vector<perspective_window::overlay_dot> points;
-        dlib::rand rnd;
-        for (double i = 0; i < 20; i+=0.001)
+
+        for (size_t i = 0; i < p.size (); ++i)
         {
-            // Get a point on a spiral
-            dlib::vector<double> val(sin(i),cos(i),i/4);
-
-            // Now add some random noise to it
-            dlib::vector<double> temp(rnd.get_random_gaussian(),
-                                      rnd.get_random_gaussian(),
-                                      rnd.get_random_gaussian());
-            val += temp/20;
-
-            // Pick a color based on how far we are along the spiral
-            rgb_pixel color = colormap_jet(i,0,20);
-
-            // And add the point to the list of points we will display
-            points.push_back(perspective_window::overlay_dot(val, color));
+            points.push_back (perspective_window::overlay_dot (
+                dlib::vector<double> (p[i].x, p[i].y, p[i].z),
+                rgb_pixel (p[i].r / 256, p[i].g / 256, p[i].b / 256)));
         }
 
-        // Now finally display the point cloud.
         perspective_window win;
-        win.set_title("perspective_window 3D point cloud");
-        win.add_overlay(points);
-        win.wait_until_closed();
-        ////////////////////////////////////////////////////
+        win.set_title (fn);
+        win.add_overlay (points);
+        win.wait_until_closed ();
 
         return 0;
     }
