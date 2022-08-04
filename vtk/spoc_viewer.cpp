@@ -1,4 +1,7 @@
-#include <algorithm>
+/*
+ *
+ *
+ * #include <algorithm>
 #include <cstdlib>
 #include <iostream>
 #include <stdexcept>
@@ -179,4 +182,53 @@ int main (int argc, char **argv)
         cerr << "exception: " << e.what () << endl;
     }
     return -1;
+}
+
+*
+*
+*
+*/
+
+#include <cmath>
+#include "spoc/spoc.h"
+#include "vtk_interactor.h"
+
+using namespace std;
+
+const std::string usage ("Usage: spoc_viewer input.spoc");
+
+int main (int argc, char **argv)
+{
+    using namespace std;
+    using namespace spoc::file;
+    using namespace spoc::io;
+
+    try
+    {
+        // Parse command line
+        if (argc != 2)
+            throw runtime_error (usage);
+
+        // Read the input file
+        const string fn (argv[1]);
+        clog << "Reading " << fn << endl;
+        ifstream ifs (fn);
+        spoc_file f = read_spoc_file (ifs);
+
+        // Get the xyz's
+        const auto p = f.get_point_records ();
+
+        for (size_t i = 0; i < p.size (); ++i)
+        {
+           // p[i].x, p[i].y, p[i].z
+           // p[i].r, p[i].g, p[i].b
+        }
+
+        return 0;
+    }
+    catch (const exception &e)
+    {
+        cerr << e.what () << endl;
+        return -1;
+    }
 }

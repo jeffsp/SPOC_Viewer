@@ -9,7 +9,7 @@
 #include <string>
 #include <vector>
 
-namespace spoc
+namespace spoc_viewer
 {
 
 namespace palette
@@ -275,6 +275,6 @@ std::vector<rgb_triplet> read_rgb_palette (const std::string &fn)
 
 } // namespace palette
 
-} // namespace spoc
+} // namespace spoc_viewer
 
 #endif // PALETTE_H

@@ -5,7 +5,7 @@
 #include <stdexcept>
 #include <string>
 
-namespace spoc
+namespace spoc_viewer
 {
 
 namespace cmd
@@ -109,6 +109,6 @@ args get_args (int argc, char **argv, const std::string &usage)
 
 } // namespace cmd
 
-} // namespace spoc
+} // namespace spoc_viewer
 
 #endif // CMD_H

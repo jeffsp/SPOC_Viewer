@@ -1,14 +1,15 @@
 default: build
 
-.PHONY: cmake # Run cmake build
-cmake:
-	mkdir -p build/debug
-	mkdir -p build/release
-	cd build/debug && cmake -DCMAKE_BUILD_TYPE=Debug ../..
-	cd build/release && cmake -DCMAKE_BUILD_TYPE=Release ../..
+# Run cmake when CMakeLists.txt changes
+./build/debug/Makefile: CMakeLists.txt
+	@echo "Running cmake..."
+	@mkdir -p build/debug
+	@mkdir -p build/release
+	@cd build/debug && cmake -DCMAKE_BUILD_TYPE=Debug ../..
+	@cd build/release && cmake -DCMAKE_BUILD_TYPE=Release ../..
 
 .PHONY: build # Build application
-build:
+build: ./build/debug/Makefile
 	cd build/debug && make -j 24
 	cd build/release && make -j 24
 

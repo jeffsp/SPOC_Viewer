@@ -434,23 +434,14 @@ vtkStandardNewMacro(CustomInteractorStyle);
 template<typename P,typename C,typename B>
 void start_interactor (const P &tmp,
         const C &palette,
-        const B &buildings,
         const std::string &color_mode,
         const std::string &camera_coordinates,
         const std::string &fn,
-        const std::string &screenshot_filename,
         const double resolution,
         const bool box_mode)
 {
-    // Filter out buildings if necessary
-    P pc;
-
-    if (buildings.polygons.empty ())
-        pc = tmp;
-    else
-        for (auto p : tmp)
-            if (p.data.classification != spoc::lidar::Classification::building)
-                pc.push_back (p);
+    // Copy the point cloud
+    P pc (tmp);
 
     const auto min = spoc::point_cloud::get_rounded_min_coords(pc, resolution);
 
@@ -538,136 +529,6 @@ void start_interactor (const P &tmp,
     vtkSmartPointer<vtkRenderWindowInteractor> renderWindowInteractor = vtkSmartPointer<vtkRenderWindowInteractor>::New();
     renderer->AddActor(pcActor);
 
-    // Optionally add building polygons
-    if (!buildings.polygons.empty ())
-    {
-        // Create containers for points and polys
-        vtkSmartPointer<vtkPoints> buildingPoints = vtkSmartPointer<vtkPoints>::New();
-        vtkSmartPointer<vtkCellArray> buildingPolygons = vtkSmartPointer<vtkCellArray>::New();
-
-        // Keep track of the ids
-        int point_id = 0;
-
-        // For each polygon
-        for (auto p : buildings.polygons)
-        {
-            // Make sure we have enough points to make a polygon
-            if (p.points.size () < 4)
-                continue;
-
-            // The polygon should form a closed loop
-            assert (p.points.front () == p.points.back ());
-
-            // The polygon is specified in clockwise direction, but VTK wants it to be counter-clockwise
-            std::reverse (p.points.begin (), p.points.end ());
-
-            // Don't include the last point, VTK does not want a closed loop
-            const size_t total_points = p.points.size () - 1;
-
-            // Create the roof polygon -- do not form a closed loop
-            vtkSmartPointer<vtkPolygon> roof = vtkSmartPointer<vtkPolygon>::New();
-            roof->GetPointIds()->SetNumberOfIds(total_points);
-            roof->GetPoints()->SetNumberOfPoints(total_points);
-
-            const double offset = -resolution / 2.0;
-
-            // Add the points to the list and to the current polygon
-            for (size_t i = 0; i < total_points; ++i)
-            {
-                // Get coords
-                const double x = p.points[i].x - min.x + offset;
-                const double y = p.points[i].y - min.y + offset;
-                // Add a small offset to the roof so that box mode cubes don't
-                // exactly align with roofs and cause artifacts.
-                const double z = p.description.max_z - min.z + 0.0001 + offset;
-
-                // Insert it
-                buildingPoints->InsertNextPoint (x, y, z);
-
-                // Set the point and point id
-                roof->GetPointIds()->SetId(i, point_id++);
-                roof->GetPoints()->SetPoint(i, x, y, z);
-            }
-
-            // Add the polygon to the polygon container
-            //buildingPolygons->InsertNextCell(roof);
-            //
-            // VTK version 6.X triangulation will fail sometimes, and it's not clear why.
-            //
-            // Therefore, you can't always add the roof polygon. If you do,
-            // the triangulation might contain errors. It looks like a bug in
-            // VTK 6.X.  Instead, we have to triangulate and manually add the
-            // individual triangles.
-            //
-            // See https://stackoverflow.com/questions/49581655/vtk-does-not-render-polygon-correctly
-            vtkSmartPointer<vtkIdList> buildingTris = vtkSmartPointer<vtkIdList>::New();
-
-            // Triangulate
-            int success = roof->Triangulate(buildingTris);
-            if (!success)
-            {
-                // Silently fail and move on...
-                continue;
-            }
-
-            // Add each triangle
-            for (int i = 0; i + 2 < buildingTris->GetNumberOfIds(); i += 3)
-            {
-                buildingPolygons->InsertNextCell(3);
-                buildingPolygons->InsertCellPoint(roof->PointIds->GetId(buildingTris->GetId(i+0)));
-                buildingPolygons->InsertCellPoint(roof->PointIds->GetId(buildingTris->GetId(i+1)));
-                buildingPolygons->InsertCellPoint(roof->PointIds->GetId(buildingTris->GetId(i+2)));
-            }
-
-            // Now create all of the walls
-            for (size_t i = 0; i + 1 < p.points.size (); ++i)
-            {
-                // Allocate the wall
-                vtkSmartPointer<vtkPolygon> wall = vtkSmartPointer<vtkPolygon>::New();
-                wall->GetPointIds()->SetNumberOfIds(4);
-
-                // Get coords
-                const double x1 = p.points[i].x - min.x + offset;
-                const double y1 = p.points[i].y - min.y + offset;
-                const double x2 = p.points[i + 1].x - min.x + offset;
-                const double y2 = p.points[i + 1].y - min.y + offset;
-                const double z = p.description.max_z - min.z + offset;
-
-                // Insert the four points that make up the wall
-                //
-                // Make sure to add them in counter-clockwise order
-                buildingPoints->InsertNextPoint (x1, y1, z);
-                buildingPoints->InsertNextPoint (x2, y2, z);
-                buildingPoints->InsertNextPoint (x2, y2, z - p.description.max_height);
-                buildingPoints->InsertNextPoint (x1, y1, z - p.description.max_height);
-
-                // Set the point ids
-                for (int j = 0; j < 4; ++j)
-                    wall->GetPointIds()->SetId(j, point_id++);
-
-                // Add the polygon to the polygon container
-                buildingPolygons->InsertNextCell(wall);
-            }
-        }
-
-        // Create a PolyData for buildings
-        vtkSmartPointer<vtkPolyData> buildingPolyData = vtkSmartPointer<vtkPolyData>::New();
-
-        // Add the points and polygons to the polydata
-        buildingPolyData->SetPoints(buildingPoints);
-        buildingPolyData->SetPolys(buildingPolygons);
-
-        // Map it into the view
-        vtkSmartPointer<vtkPolyDataMapper> buildingMapper = vtkSmartPointer<vtkPolyDataMapper>::New();
-        buildingMapper->SetInputData(buildingPolyData);
-
-        vtkSmartPointer<vtkActor> buildingActor = vtkSmartPointer<vtkActor>::New();
-        buildingActor->GetProperty()->SetOpacity(1.0);
-        buildingActor->GetProperty()->SetColor(0.9,0.9,0.7);
-        buildingActor->SetMapper(buildingMapper);
-        renderer->AddActor(buildingActor);
-    }
-
     // Set the style
     renderWindowInteractor->SetRenderWindow(renderWindow);
     vtkSmartPointer<vtk_interactor::CustomInteractorStyle> style = vtkSmartPointer<vtk_interactor::CustomInteractorStyle>::New();
@@ -714,23 +575,6 @@ void start_interactor (const P &tmp,
     renderer->AddLight(light1);
     renderer->AddLight(light2);
     renderWindow->Render();
-
-    // Take screenshot, if specified
-    if (!screenshot_filename.empty ())
-    {
-        vtkSmartPointer<vtkWindowToImageFilter> windowToImageFilter = vtkSmartPointer<vtkWindowToImageFilter>::New();
-        windowToImageFilter->SetInput(renderWindow);
-        windowToImageFilter->SetMagnification(1);
-        windowToImageFilter->SetInputBufferTypeToRGBA();
-        windowToImageFilter->ReadFrontBufferOff();
-        windowToImageFilter->Update();
-        vtkSmartPointer<vtkPNGWriter> writer = vtkSmartPointer<vtkPNGWriter>::New();
-        writer->SetFileName(screenshot_filename.c_str());
-        writer->SetInputConnection(windowToImageFilter->GetOutputPort());
-        writer->Write();
-        // Return without starting the event loop
-        return;
-    }
 
     // Show text
     renderer->AddActor2D (style->textActor);
