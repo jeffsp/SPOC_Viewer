@@ -1,7 +1,7 @@
 #include <cmath>
 #include <dlib/gui_widgets.h>
 #include <dlib/image_transforms.h>
-#include "spoc.h"
+#include "spoc/spoc.h"
 
 using namespace dlib;
 using namespace std;
@@ -11,7 +11,8 @@ const std::string usage ("Usage: spoc_viewer input.spoc");
 int main (int argc, char **argv)
 {
     using namespace std;
-    using namespace spoc;
+    using namespace spoc::file;
+    using namespace spoc::io;
 
     try
     {
