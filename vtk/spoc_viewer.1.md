@@ -57,10 +57,6 @@ View a point cloud given a LAS file.
     the *camera-coordinates* argument, if provided), saved to the
     *filename* in PNG format, and then the application will exit.
 
---buildings=*FN*, -B *FN*
-:   Specify a building shapefile name.
-
-
 
 # USER INTERFACE
 

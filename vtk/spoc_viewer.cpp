@@ -1,72 +1,24 @@
-/*
- *
- *
- * #include <algorithm>
-#include <cstdlib>
-#include <iostream>
-#include <stdexcept>
-#include <string>
 #include "cmd.h"
 #include "palette.h"
+#include "spoc/spoc.h"
 #include "version.h"
-
 #include "vtk_interactor.h"
 
 using namespace std;
-using namespace spoc::app_utils;
-using namespace spoc::shapefile;
-using namespace spoc::cmd;
-using namespace spoc::lasio;
-using namespace spoc::lidar;
-using namespace spoc::palette;
-using namespace spoc::point_cloud;
-using namespace spoc::point3d;
-using namespace spoc::shapefileio;
-using namespace spoc::voxel;
 
-const string usage = "spoc_viewer [options] <las_filename>";
-
-// Support aliases
-using P = point3d<point_data>;
-using L = las_file<P>;
-
-template<typename T>
-T voxelize (const T &pc, const double resolution)
-{
-    // Get a voxel index for each point in the point cloud
-    auto indexes = get_voxel_indexes (pc, resolution);
-
-    // Map each voxel index to a point cloud point
-    using voxel_point_map = unordered_map<voxel_index, P, voxel_index_hash>;
-    voxel_point_map vpm;
-
-    // Set them
-    auto min_coords = get_rounded_min_coords (pc, resolution);
-    for (size_t i = 0; i < pc.size (); ++i)
-    {
-        // Get the index
-        const auto index = indexes[i];
-        // Pick the data from a point in this voxel, and set it
-        vpm[index].data = pc[i].data;
-        // Get the location relative to the voxel cube
-        vpm[index].x = index.i * resolution + min_coords.x + resolution / 2.0;
-        vpm[index].y = index.j * resolution + min_coords.y + resolution / 2.0;
-        vpm[index].z = index.k * resolution + min_coords.z + resolution / 2.0;
-    }
-
-    // Convert map to a vector of voxelized points
-    vector<P> vpc (vpm.size ());
-    size_t i = 0;
-    for (auto v : vpm)
-        vpc[i++] = v.second;
-
-    return vpc;
-}
+const std::string usage ("Usage: spoc_viewer input.spoc");
 
 int main (int argc, char **argv)
 {
+    using namespace std;
+    using namespace spoc_viewer::cmd;
+    using namespace spoc_viewer::palette;
+    using namespace spoc::file;
+    using namespace spoc::io;
+
     try
     {
+        // Parse command line
         args args = get_args (argc, argv, usage);
 
         // If you are getting help, exit without an error
@@ -77,7 +29,14 @@ int main (int argc, char **argv)
         if (args.verbose)
         {
             clog << boolalpha;
-            clog << spoc::version::get_version_string () << std::endl;
+            clog << "spoc viewer version "
+                << spoc_viewer::MAJOR_VERSION
+                << spoc_viewer::MINOR_VERSION
+                << std::endl;
+            clog << "spoc version "
+                << spoc::MAJOR_VERSION
+                << spoc::MINOR_VERSION
+                << std::endl;
             clog << "Las_filename " << args.las_filename << endl;
             clog << "Palette_filename " << args.palette_filename << endl;
             clog << "Resolution " << args.resolution << endl;
@@ -127,102 +86,44 @@ int main (int argc, char **argv)
             }
         }
 
-        // Open the las file
-        if (args.verbose)
-            clog << "Reading " << args.las_filename << endl;
-
-        L las (args.las_filename);
-        auto pc = las.get_points ();
-
-        if (args.verbose)
-        {
-            write_las_info (clog, las);
-            write_pc_info (clog, pc);
-        }
-
-
-        if (args.verbose)
-            clog << "Total points " << pc.size () << endl;
-
-        if (args.resolution != 0.0)
-        {
-            if (args.verbose)
-                clog << "Converting points to voxels" << endl;
-
-            pc = voxelize (pc, args.resolution);
-
-            if (args.verbose)
-                clog << "Total voxelized points " << pc.size () << endl;
-        }
-
-        building_collection buildings;
-        if (!args.building_shapefile_filename.empty ())
-        {
-            if (args.verbose)
-                clog << "Reading building shapefile " << args.building_shapefile_filename << endl;
-
-            buildings = read_polygons<building_collection> (args.building_shapefile_filename);
-
-            if (args.verbose)
-                clog << "Total building polygons " << buildings.polygons.size () << endl;
-        }
-
-        vtk_interactor::start_interactor (pc, palette, buildings,
-                args.color_mode,
-                args.camera_coordinates,
-                args.las_filename,
-                args.screenshot_filename,
-                args.resolution,
-                args.box_mode);
-
-        return 0;
-    }
-    catch (const exception &e)
-    {
-        cerr << "exception: " << e.what () << endl;
-    }
-    return -1;
-}
-
-*
-*
-*
-*/
-
-#include <cmath>
-#include "spoc/spoc.h"
-#include "vtk_interactor.h"
-
-using namespace std;
-
-const std::string usage ("Usage: spoc_viewer input.spoc");
-
-int main (int argc, char **argv)
-{
-    using namespace std;
-    using namespace spoc::file;
-    using namespace spoc::io;
-
-    try
-    {
-        // Parse command line
-        if (argc != 2)
-            throw runtime_error (usage);
-
         // Read the input file
         const string fn (argv[1]);
         clog << "Reading " << fn << endl;
         ifstream ifs (fn);
         spoc_file f = read_spoc_file (ifs);
 
-        // Get the xyz's
-        const auto p = f.get_point_records ();
+        if (args.verbose)
+            clog << "Total points " << f.get_point_records ().size () << endl;
 
-        for (size_t i = 0; i < p.size (); ++i)
+        if (args.resolution != 0.0)
         {
-           // p[i].x, p[i].y, p[i].z
-           // p[i].r, p[i].g, p[i].b
+            if (args.verbose)
+                clog << "Converting points to voxels" << endl;
+
+            // Get an empty clone of the spoc file
+            auto g = f.clone_empty ();
+
+            // Get the indexes into f
+            const auto indexes = spoc::subsampling::get_subsample_indexes (f.get_point_records (), args.resolution, 123456);
+
+            // Add them
+            for (auto i : indexes)
+                g.add (f.get_point_records ()[i]);
+
+            // Commit
+            f = g;
+
+            if (args.verbose)
+                clog << "Total voxelized points " << f.get_point_records ().size () << endl;
         }
+
+        vtk_interactor::start_interactor (f.get_point_records (),
+                palette,
+                args.color_mode,
+                args.camera_coordinates,
+                args.las_filename,
+                args.resolution,
+                args.box_mode);
 
         return 0;
     }

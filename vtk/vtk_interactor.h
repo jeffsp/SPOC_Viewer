@@ -1,36 +1,33 @@
 #ifndef VTK_INTERACTOR_H
 #define VTK_INTERACTOR_H
 
-// These need to be before any VTK includes
-#define vtkRenderingCore_AUTOINIT 4(vtkInteractionStyle,vtkRenderingFreeType,vtkRenderingFreeTypeOpenGL,vtkRenderingOpenGL)
-#define vtkRenderingVolume_AUTOINIT 1(vtkRenderingVolumeOpenGL)
-
-#include <vtk/vtkActor.h>
-#include <vtk/vtkCamera.h>
-#include <vtk/vtkCellArray.h>
-#include <vtk/vtkCubeSource.h>
-#include <vtk/vtkGlyph3D.h>
-#include <vtk/vtkLight.h>
-#include <vtk/vtkLightCollection.h>
-#include <vtk/vtkObjectFactory.h>
-#include <vtk/vtkPNGWriter.h>
-#include <vtk/vtkPointData.h>
-#include <vtk/vtkPointSource.h>
-#include <vtk/vtkPolyData.h>
-#include <vtk/vtkPolyDataMapper.h>
-#include <vtk/vtkPolygon.h>
-#include <vtk/vtkProperty.h>
-#include <vtk/vtkRenderWindow.h>
-#include <vtk/vtkRenderWindowInteractor.h>
-#include <vtk/vtkRenderer.h>
-#include <vtk/vtkSmartPointer.h>
-#include <vtk/vtkTextActor.h>
-#include <vtk/vtkTextProperty.h>
-#include <vtk/vtkVertexGlyphFilter.h>
-#include <vtk/vtkWindowToImageFilter.h>
-#include <vtk/vtkXOpenGLRenderWindow.h>
-#include <vtk/vtkXRenderWindowInteractor.h>
-#include <vtk/vtkInteractorStyleTrackballCamera.h>
+#include <vtkActor.h>
+#include <vtkCamera.h>
+#include <vtkCellArray.h>
+#include <vtkCubeSource.h>
+#include <vtkGlyph3D.h>
+#include <vtkInteractorStyleTrackballCamera.h>
+#include <vtkLight.h>
+#include <vtkLightCollection.h>
+#include <vtkObjectFactory.h>
+#include <vtkPNGWriter.h>
+#include <vtkPointData.h>
+#include <vtkPointSource.h>
+#include <vtkPolyData.h>
+#include <vtkPolyDataMapper.h>
+#include <vtkPolygon.h>
+#include <vtkProperty.h>
+#include <vtkRenderWindow.h>
+#include <vtkRenderWindowInteractor.h>
+#include <vtkRenderer.h>
+#include <vtkSmartPointer.h>
+#include <vtkTextActor.h>
+#include <vtkTextProperty.h>
+#include <vtkUnsignedCharArray.h>
+#include <vtkVertexGlyphFilter.h>
+#include <vtkWindowToImageFilter.h>
+#include <vtkXOpenGLRenderWindow.h>
+#include <vtkXRenderWindowInteractor.h>
 #include <sstream>
 
 #include "palette.h"
@@ -69,15 +66,13 @@ void set_elevation_colors (T colors, const U &pc, const V &palette)
 {
     // Setup colors
     assert (!palette.empty ());
-    using namespace spoc::point_cloud;
     const double resolution = 1.0;
-    auto min = spoc::point_cloud::get_rounded_min_coords (pc, resolution);
-    auto max = spoc::point_cloud::get_rounded_max_coords (pc, resolution);
-    double dz = max.z - min.z;
+    const auto e = spoc::extent::get_extent (pc);
+    double dz = e.maxp.z - e.minp.z;
 
     for (size_t i = 0; i < pc.size (); ++i)
     {
-        const double z = pc[i].z - min.z;
+        const double z = pc[i].z - e.minp.z;
         const unsigned index = round ((palette.size () - 1) * z / dz);
         assert (index < palette.size ());
         const unsigned r = palette[index][0];
@@ -91,7 +86,7 @@ void set_elevation_colors (T colors, const U &pc, const V &palette)
             static_cast<unsigned char> (g),
             static_cast<unsigned char> (b)
         };
-        colors->InsertNextTupleValue(color);
+        colors->InsertNextTypedTuple(color);
     }
 }
 
@@ -101,13 +96,12 @@ void set_intensity_colors (T colors, const U &pc, const V &palette)
 {
     // Setup colors
     assert (!palette.empty ());
-    using namespace spoc::point_cloud;
 
     // Put all intensities into a vector
     std::vector<uint16_t> intensities (pc.size ());
 
     for (size_t i = 0; i < pc.size (); ++i)
-        intensities[i] = pc[i].data.intensity;
+        intensities[i] = pc[i].i;
 
     // Sort by value
     sort (intensities.begin (), intensities.end ());
@@ -119,7 +113,7 @@ void set_intensity_colors (T colors, const U &pc, const V &palette)
     {
         unsigned index = (max_intensity == 0.0)
             ? 0
-            : round ((palette.size () - 1) * pc[i].data.intensity / max_intensity);
+            : round ((palette.size () - 1) * pc[i].i / max_intensity);
         // It may go over if it's in the top 5%
         index = std::min (size_t (index), size_t (palette.size () - 1));
         const unsigned r = palette[index][0];
@@ -133,7 +127,7 @@ void set_intensity_colors (T colors, const U &pc, const V &palette)
             static_cast<unsigned char> (g),
             static_cast<unsigned char> (b)
         };
-        colors->InsertNextTupleValue(color);
+        colors->InsertNextTypedTuple(color);
     }
 }
 
@@ -145,7 +139,7 @@ void set_shaded_classification_colors (T colors, const U &pc, const V &palette)
     std::vector<uint16_t> intensities (pc.size ());
 
     for (size_t i = 0; i < pc.size (); ++i)
-        intensities[i] = pc[i].data.intensity;
+        intensities[i] = pc[i].i;
 
     // Sort by value
     sort (intensities.begin (), intensities.end ());
@@ -156,18 +150,18 @@ void set_shaded_classification_colors (T colors, const U &pc, const V &palette)
     // Setup colors
     for (size_t i = 0; i < pc.size (); ++i)
     {
-        size_t index = static_cast<size_t> (pc[i].data.classification);
+        size_t index = static_cast<size_t> (pc[i].c);
         if (index >= palette.size ())
             index = 0;
         // Scale it by the intensity clamped to 1.0
-        const double scale = std::min (pc[i].data.intensity / max_intensity, 0.5) + 0.5;
+        const double scale = std::min (pc[i].i/ max_intensity, 0.5) + 0.5;
         const unsigned r = palette[index][0];
         const unsigned g = palette[index][1];
         const unsigned b = palette[index][2];
         // Keep the color constant, but change the luminance
-        auto yuv = spoc::palette::rgb2yuv (spoc::palette::rgb_triplet {r, g, b});
+        auto yuv = spoc_viewer::palette::rgb2yuv (spoc_viewer::palette::rgb_triplet {r, g, b});
         yuv[0] *= scale;
-        auto rgb = spoc::palette::yuv2rgb (yuv);
+        auto rgb = spoc_viewer::palette::yuv2rgb (yuv);
 
         assert (rgb[0] < 256);
         assert (rgb[1] < 256);
@@ -177,7 +171,7 @@ void set_shaded_classification_colors (T colors, const U &pc, const V &palette)
             static_cast<unsigned char> (rgb[1]),
             static_cast<unsigned char> (rgb[2])
         };
-        colors->InsertNextTupleValue(color);
+        colors->InsertNextTypedTuple(color);
     }
 }
 
@@ -188,7 +182,7 @@ void set_classification_colors (T colors, const U &pc, const V &palette)
     // Setup colors
     for (size_t i = 0; i < pc.size (); ++i)
     {
-        size_t index = static_cast<size_t> (pc[i].data.classification);
+        size_t index = static_cast<size_t> (pc[i].c);
         if (index >= palette.size ())
             index = 0;
         const unsigned r = palette[index][0];
@@ -202,7 +196,7 @@ void set_classification_colors (T colors, const U &pc, const V &palette)
             static_cast<unsigned char> (g),
             static_cast<unsigned char> (b)
         };
-        colors->InsertNextTupleValue(color);
+        colors->InsertNextTypedTuple(color);
     }
 }
 
@@ -214,8 +208,8 @@ void set_region_colors (T colors, const U &pc, const V &palette, W indexer)
     for (size_t i = 0; i < pc.size (); ++i)
     {
         // The index is based on the classification and region id
-        const unsigned classification = static_cast<int> (pc[i].data.classification);
-        const unsigned id = static_cast<int> (pc[i].data.id);
+        const unsigned classification = static_cast<int> (pc[i].c);
+        const unsigned id = static_cast<int> (pc[i].p);
         // ID 0 is special, it means no region has been assigned
         size_t index = id == 0 ? 0 : indexer (classification, id);
         assert (index < palette.size ());
@@ -230,7 +224,7 @@ void set_region_colors (T colors, const U &pc, const V &palette, W indexer)
             static_cast<unsigned char> (g),
             static_cast<unsigned char> (b)
         };
-        colors->InsertNextTupleValue(color);
+        colors->InsertNextTypedTuple(color);
     }
 }
 
@@ -241,7 +235,7 @@ void set_region_colors_random (T colors, const U &pc, const V &palette)
     // Setup colors
     for (size_t i = 0; i < pc.size (); ++i)
     {
-        const unsigned id = static_cast<int> (pc[i].data.id);
+        const unsigned id = static_cast<int> (pc[i].p);
         size_t index = id % palette.size ();
         assert (index < palette.size ());
         const unsigned r = palette[index][0];
@@ -255,7 +249,7 @@ void set_region_colors_random (T colors, const U &pc, const V &palette)
             static_cast<unsigned char> (g),
             static_cast<unsigned char> (b)
         };
-        colors->InsertNextTupleValue(color);
+        colors->InsertNextTypedTuple(color);
     }
 }
 
@@ -264,17 +258,17 @@ template<typename T,typename U>
 void set_rgb_colors (T colors, const U &pc)
 {
     // Get range of RGB's
-    auto minrgb = pc[0].data.red;
-    auto maxrgb = pc[0].data.red;
+    auto minrgb = pc[0].r;
+    auto maxrgb = pc[0].r;
 
     for (size_t i = 0; i < pc.size (); ++i)
     {
-        minrgb = std::min (minrgb, pc[i].data.red);
-        minrgb = std::min (minrgb, pc[i].data.green);
-        minrgb = std::min (minrgb, pc[i].data.blue);
-        maxrgb = std::max (maxrgb, pc[i].data.red);
-        maxrgb = std::max (maxrgb, pc[i].data.green);
-        maxrgb = std::max (maxrgb, pc[i].data.blue);
+        minrgb = std::min (minrgb, pc[i].r);
+        minrgb = std::min (minrgb, pc[i].g);
+        minrgb = std::min (minrgb, pc[i].b);
+        maxrgb = std::max (maxrgb, pc[i].r);
+        maxrgb = std::max (maxrgb, pc[i].g);
+        maxrgb = std::max (maxrgb, pc[i].b);
     }
 
     if (minrgb == maxrgb)
@@ -290,9 +284,9 @@ void set_rgb_colors (T colors, const U &pc)
     // Setup colors
     for (size_t i = 0; i < pc.size (); ++i)
     {
-        const int r = static_cast<int> ((pc[i].data.red - minrgb) * scale);
-        const int g = static_cast<int> ((pc[i].data.green - minrgb) * scale);
-        const int b = static_cast<int> ((pc[i].data.blue - minrgb) * scale);
+        const int r = static_cast<int> ((pc[i].r - minrgb) * scale);
+        const int g = static_cast<int> ((pc[i].g - minrgb) * scale);
+        const int b = static_cast<int> ((pc[i].b - minrgb) * scale);
         assert (r < 256);
         assert (g < 256);
         assert (b < 256);
@@ -301,7 +295,7 @@ void set_rgb_colors (T colors, const U &pc)
             static_cast<unsigned char> (g),
             static_cast<unsigned char> (b)
         };
-        colors->InsertNextTupleValue(color);
+        colors->InsertNextTypedTuple(color);
     }
 }
 
@@ -431,7 +425,7 @@ class CustomInteractorStyle : public vtkInteractorStyleTrackballCamera
 // Required for the object factories
 vtkStandardNewMacro(CustomInteractorStyle);
 
-template<typename P,typename C,typename B>
+template<typename P,typename C>
 void start_interactor (const P &tmp,
         const C &palette,
         const std::string &color_mode,
@@ -443,11 +437,11 @@ void start_interactor (const P &tmp,
     // Copy the point cloud
     P pc (tmp);
 
-    const auto min = spoc::point_cloud::get_rounded_min_coords(pc, resolution);
+    const auto e = spoc::extent::get_extent (pc);
 
     vtkSmartPointer<vtkPoints> points = vtkSmartPointer<vtkPoints>::New();
     for (auto p : pc)
-        points->InsertNextPoint (p.x - min.x, p.y - min.y, p.z - min.z);
+        points->InsertNextPoint (p.x - e.minp.x, p.y - e.minp.y, p.z - e.minp.z);
 
     vtkSmartPointer<vtkUnsignedCharArray> colors = vtkSmartPointer<vtkUnsignedCharArray>::New();
     colors->SetNumberOfComponents(3);
@@ -473,7 +467,7 @@ void start_interactor (const P &tmp,
         set_intensity_colors (colors, pc, palette);
         break;
         case 'r': // Region
-        set_region_colors (colors, pc, palette, spoc::palette::region_palette_indexer);
+        set_region_colors (colors, pc, palette, spoc_viewer::palette::region_palette_indexer);
         break;
         case 'x': // Region
         set_region_colors_random (colors, pc, palette);

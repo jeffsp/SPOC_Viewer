@@ -2,6 +2,7 @@
 #define CMD_H
 
 #include <getopt.h>
+#include <iostream>
 #include <stdexcept>
 #include <string>
 
@@ -46,7 +47,6 @@ struct args
     bool box_mode = false;
     std::string camera_coordinates;
     std::string screenshot_filename;
-    std::string building_shapefile_filename;
 };
 
 args get_args (int argc, char **argv, const std::string &usage)
@@ -67,7 +67,7 @@ args get_args (int argc, char **argv, const std::string &usage)
             {0,      0,           0,  0 }
         };
 
-        int c = getopt_long(argc, argv, "hvp:r:c:ba:s:B:", long_options, &option_index);
+        int c = getopt_long(argc, argv, "hvp:r:c:ba:s:", long_options, &option_index);
         if (c == -1)
             break;
 
@@ -90,7 +90,6 @@ args get_args (int argc, char **argv, const std::string &usage)
             case 'b': args.box_mode = true; break;
             case 'a': args.camera_coordinates = optarg; break;
             case 's': args.screenshot_filename = optarg; break;
-            case 'B': args.building_shapefile_filename = optarg; break;
         }
     }
 
