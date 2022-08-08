@@ -42,7 +42,7 @@ struct args
     bool verbose = false;
     float resolution = 0.5;
     std::string palette_filename;
-    std::string las_filename;
+    std::string spoc_filename;
     std::string color_mode = "s";
     bool box_mode = false;
     std::string camera_coordinates;
@@ -95,9 +95,9 @@ args get_args (int argc, char **argv, const std::string &usage)
 
     // Get input filename
     if (optind == argc)
-        throw std::runtime_error ("No LAS filename was specified");
+        throw std::runtime_error ("No SPOC filename was specified");
 
-    args.las_filename = argv[optind++];
+    args.spoc_filename = argv[optind++];
 
     // Check command line
     if (optind != argc)

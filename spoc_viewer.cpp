@@ -37,7 +37,7 @@ int main (int argc, char **argv)
                 << spoc::MAJOR_VERSION
                 << spoc::MINOR_VERSION
                 << std::endl;
-            clog << "Las_filename " << args.las_filename << endl;
+            clog << "SPOC " << args.spoc_filename << endl;
             clog << "Palette_filename " << args.palette_filename << endl;
             clog << "Resolution " << args.resolution << endl;
             clog << "Color_mode " << args.color_mode << endl;
@@ -121,7 +121,7 @@ int main (int argc, char **argv)
                 palette,
                 args.color_mode,
                 args.camera_coordinates,
-                args.las_filename,
+                args.spoc_filename,
                 args.resolution,
                 args.box_mode);
 
