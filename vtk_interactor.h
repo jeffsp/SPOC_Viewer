@@ -419,7 +419,7 @@ class CustomInteractorStyle : public vtkInteractorStyleTrackballCamera
     bool help_on = false;
     static constexpr const char *DEFAULT_TEXT = "Help=?|H";
     static constexpr const char *HELP_TEXT =
-        "Q,Esc=Quit | +-=Zoom | C=Write-camera-coords | A=Read-camera-coords | F=Fly-to | Space=Up-is-up | ?=Help";
+        "Q,Esc=Quit | +-=Zoom | C=Write-camera-coords | A=Read-camera-coords | F=Fly-to | Space=Up-is-up | H=Help";
 };
 
 // Required for the object factories
