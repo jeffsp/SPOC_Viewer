@@ -22,34 +22,34 @@ std::vector<rgb_triplet> get_default_classification_palette ()
 {
     std::vector<rgb_triplet> pal =
     {
-        {250, 200, 200}, // 0
-        {200, 250, 200}, // 1, unclassified
-        {150, 100, 100}, // 2, ground
-        {  0, 130,   0}, // 3, low veg
-        {  0, 130,   0}, // 4, med veg
-        {100, 200, 100}, // 5, high veg
-        {250, 230, 130}, // 6, building
-        {250,   0,   0}, // 7, low noise
-        {250,  50,  50}, // 8, high noise
-        { 50,  50, 250}, // 9, water
-        {200, 200, 130}, // 10, rail
-        {150, 150, 150}, // 11, road
-        {130,  50,   0}, // 12, bridge
-        {100, 100, 250}, // 13, wire
-        { 50,  50,  50}, // 14, unused
-        {130, 130, 200}, // 15, tower
-        {200, 200, 250}, // 16, bad data
-        {100, 100, 150}, // 17, bridge
-        {  0, 250,   0}, // 18, high noise
-        {130, 200, 200}, // 19, vertical obstruction
-        {200, 100, 100}, // 20, below ground, non-noise
-        {  0, 200, 200}, // 21, vehicles
-        {100, 100, 100}, // 22, misc-manmade
-        {100,  50, 100}, // 23, perimeter
-        {200, 150, 100}, // 24, urban elements
-        {250, 100, 100}, // 25, ducts
-        { 50, 200, 200}, // 26, aircraft
-        {200, 200,  50}, // 27, solar panel array
+        {0x00, 0x40, 0x40}, // 0
+        {0xff, 0x00, 0x00}, // 1, unclassified
+        {0x80, 0x40, 0x00}, // 2, ground
+        {0x00, 0xd5, 0x00}, // 3, low veg
+        {0x00, 0x80, 0x00}, // 4, med veg
+        {0x00, 0xc0, 0x00}, // 5, high veg
+        {0x00, 0xff, 0xff}, // 6, building
+        {0x80, 0x80, 0xc0}, // 7, low noise
+        {0x80, 0x80, 0x80}, // 8, high noise
+        {0x00, 0x00, 0xff}, // 9, water
+        {0x80, 0x80, 0x00}, // 10, rail
+        {0xc0, 0xc0, 0xc0}, // 11, road
+        {0x80, 0x80, 0x80}, // 12, bridge
+        {0xff, 0xff, 0x00}, // 13, wire
+        {0x00, 0x80, 0xc0}, // 14, unused
+        {0xff, 0xc8, 0xc0}, // 15, tower
+        {0xff, 0x80, 0xc0}, // 16, bad data
+        {0x40, 0x20, 0x00}, // 17, bridge
+        {0xff, 0x80, 0xc0}, // 18, high noise
+        {0xf3, 0x9e, 0x00}, // 19, vertical obstruction
+        {0x80, 0x40, 0x40}, // 20, below ground, non-noise
+        {0x80, 0x00, 0xff}, // 21, vehicles
+        {0x80, 0x80, 0x80}, // 22, misc-manmade
+        {0xff, 0x00, 0x80}, // 23, perimeter
+        {0x80, 0x00, 0x80}, // 24, urban elements
+        {0x00, 0x00, 0x80}, // 25, ducts
+        {0x80, 0x00, 0x80}, // 26, aircraft
+        {0x00, 0x00, 0xa0}, // 27, solar panel array
     };
     return pal;
 }
