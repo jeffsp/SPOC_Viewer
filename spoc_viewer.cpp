@@ -87,18 +87,23 @@ int main (int argc, char **argv)
         }
 
         // Read the input file
-        const string fn (argv[1]);
+        const string fn (args.spoc_filename);
+
         clog << "Reading " << fn << endl;
         ifstream ifs (fn);
+
+        if (!ifs)
+            throw runtime_error ("Could not open file for reading");
+
         spoc_file f = read_spoc_file (ifs);
 
         if (args.verbose)
             clog << "Total points " << f.get_point_records ().size () << endl;
 
-        if (args.resolution != 0.0)
+        if (args.resolution > 0.0)
         {
             if (args.verbose)
-                clog << "Converting points to voxels" << endl;
+                clog << "Subsampling points" << endl;
 
             // Get an empty clone of the spoc file
             auto g = f.clone_empty ();

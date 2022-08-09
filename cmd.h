@@ -40,7 +40,7 @@ struct args
 {
     bool help = false;
     bool verbose = false;
-    float resolution = 0.5;
+    float resolution = -1.0;
     std::string palette_filename;
     std::string spoc_filename;
     std::string color_mode = "s";
