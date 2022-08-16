@@ -326,12 +326,12 @@ class CustomInteractorStyle : public vtkInteractorStyleTrackballCamera
 
         if (key == "Escape")
             rwi->TerminateApp ();
-        if (key == "Up" || key == "KP_Add")
+        else if (key == "Up" || key == "KP_Add")
             OnMouseWheelForward ();
-        if (key == "Down" || key == "KP_Subtract")
+        else if (key == "Down" || key == "KP_Subtract")
             OnMouseWheelBackward ();
-        // "Up-is-up" command
-        if (key == "space")
+        // "Vertical align" command
+        else if (key == "space")
         {
             auto renderer = GetCurrentRenderer ();
             auto camera = renderer->GetActiveCamera ();
@@ -339,7 +339,7 @@ class CustomInteractorStyle : public vtkInteractorStyleTrackballCamera
             GetInteractor ()->Render ();
         }
         // Dump camera coordinates
-        if (key == "c")
+        else if (key == "c")
         {
             auto renderer = GetCurrentRenderer ();
             auto camera = renderer->GetActiveCamera ();
@@ -372,7 +372,7 @@ class CustomInteractorStyle : public vtkInteractorStyleTrackballCamera
             GetInteractor ()->Render ();
         }
         // Read camera coordinates
-        if (key == "a")
+        else if (key == "a")
         {
             auto renderer = GetCurrentRenderer ();
             auto camera = renderer->GetActiveCamera ();
@@ -401,7 +401,7 @@ class CustomInteractorStyle : public vtkInteractorStyleTrackballCamera
             GetInteractor ()->Render ();
         }
         // Help text
-        if (key == "h" || key == "question")
+        else if (key == "h" || key == "question")
         {
             help_on = !help_on;
             if (help_on)
@@ -419,7 +419,7 @@ class CustomInteractorStyle : public vtkInteractorStyleTrackballCamera
     bool help_on = false;
     static constexpr const char *DEFAULT_TEXT = "Help=?|H";
     static constexpr const char *HELP_TEXT =
-        "Q,Esc=Quit | +-=Zoom | C=Write-camera-coords | A=Read-camera-coords | F=Fly-to | Space=Up-is-up | H=Help";
+        "Q,Esc=Quit | +-=Zoom | C=Write-camera-coords | A=Read-camera-coords | F=Fly-to | Space=Vertical-align | H=Help";
 };
 
 // Required for the object factories
