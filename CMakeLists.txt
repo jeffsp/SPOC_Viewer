@@ -26,7 +26,7 @@ if (NOT VTK_FOUND)
     message(FATAL_ERROR "VTK NOT Found")
 endif ()
 
-include_directories(../spoc)
+include_directories(./spoc)
 
 add_executable(spoc_viewer spoc_viewer.cpp)
 target_link_libraries(spoc_viewer gmp z ${VTK_LIBRARIES})
