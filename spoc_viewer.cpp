@@ -113,7 +113,7 @@ int main (int argc, char **argv)
 
             // Add them
             for (auto i : indexes)
-                g.add (f.get_point_records ()[i]);
+                g.push_back (f.get_point_records ()[i]);
 
             // Commit
             f = g;
