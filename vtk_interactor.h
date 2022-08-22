@@ -258,14 +258,11 @@ template<typename T,typename U>
 void set_rgb_colors (T colors, const U &pc)
 {
     // Get range of RGB's
-    auto minrgb = pc[0].r;
+    auto minrgb = 0;
     auto maxrgb = pc[0].r;
 
     for (size_t i = 0; i < pc.size (); ++i)
     {
-        minrgb = std::min (minrgb, pc[i].r);
-        minrgb = std::min (minrgb, pc[i].g);
-        minrgb = std::min (minrgb, pc[i].b);
         maxrgb = std::max (maxrgb, pc[i].r);
         maxrgb = std::max (maxrgb, pc[i].g);
         maxrgb = std::max (maxrgb, pc[i].b);
