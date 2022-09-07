@@ -106,8 +106,8 @@ void set_intensity_colors (T colors, const U &pc, const V &palette)
     // Sort by value
     sort (intensities.begin (), intensities.end ());
 
-    // Get the one at the 95% quantile boundary
-    const double max_intensity = intensities[intensities.size () * 0.95];
+    // Get the max
+    const double max_intensity = intensities.back ();
 
     for (size_t i = 0; i < pc.size (); ++i)
     {
