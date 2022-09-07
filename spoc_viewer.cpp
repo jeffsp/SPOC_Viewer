@@ -15,6 +15,7 @@ int main (int argc, char **argv)
     using namespace spoc_viewer::palette;
     using namespace spoc::file;
     using namespace spoc::io;
+    using namespace spoc::point_record;
 
     try
     {
@@ -37,7 +38,7 @@ int main (int argc, char **argv)
                 << spoc::MAJOR_VERSION
                 << spoc::MINOR_VERSION
                 << std::endl;
-            clog << "SPOC " << args.spoc_filename << endl;
+            clog << "SPOC filenames " << args.spoc_filenames.size () << endl;
             clog << "Palette_filename " << args.palette_filename << endl;
             clog << "Resolution " << args.resolution << endl;
             clog << "Color_mode " << args.color_mode << endl;
@@ -86,47 +87,61 @@ int main (int argc, char **argv)
             }
         }
 
-        // Read the input file
-        const string fn (args.spoc_filename);
+        // The points to view
+        point_records prs;
 
-        clog << "Reading " << fn << endl;
-        ifstream ifs (fn);
-
-        if (!ifs)
-            throw runtime_error ("Could not open file for reading");
-
-        spoc_file f = read_spoc_file (ifs);
-
-        if (args.verbose)
-            clog << "Total points " << f.get_point_records ().size () << endl;
-
-        if (args.resolution > 0.0)
+        for (const auto &fn : args.spoc_filenames)
         {
-            if (args.verbose)
-                clog << "Subsampling points" << endl;
+            // Read the input file
+            clog << "Reading " << fn << endl;
+            ifstream ifs (fn);
 
-            // Get an empty clone of the spoc file
-            auto g = f.clone_empty ();
+            if (!ifs)
+                throw runtime_error ("Could not open file for reading");
 
-            // Get the indexes into f
-            const auto indexes = spoc::subsampling::get_subsample_indexes (f.get_point_records (), args.resolution, 123456);
-
-            // Add them
-            for (auto i : indexes)
-                g.push_back (f.get_point_records ()[i]);
-
-            // Commit
-            f = g;
+            spoc_file f = read_spoc_file (ifs);
 
             if (args.verbose)
-                clog << "Total voxelized points " << f.get_point_records ().size () << endl;
+                clog << f.get_point_records ().size () << " points read" << endl;
+
+            if (args.resolution > 0.0)
+            {
+                if (args.verbose)
+                    clog << "Subsampling points" << endl;
+
+                // Get the indexes into f
+                const auto indexes = spoc::subsampling::get_subsample_indexes (f.get_point_records (), args.resolution, 123456);
+
+                if (args.verbose)
+                    clog << "Total voxelized points " << indexes.size () << endl;
+
+                // Add them
+                for (auto i : indexes)
+                    prs.push_back (f.get_point_records ()[i]);
+            }
+            else
+            {
+                // Move them out of the point cloud
+                const auto p = f.move_point_records ();
+
+                // Add them
+                prs.insert (prs.begin (), p.begin (), p.end ());
+            }
         }
 
-        vtk_interactor::start_interactor (f.get_point_records (),
+        if (args.verbose)
+            clog << "Total points " << prs.size () << endl;
+
+        const string fn = args.spoc_filenames.size () == 1
+            ? args.spoc_filenames[0]
+            : string ("...");
+
+        // View them
+        vtk_interactor::start_interactor (prs,
                 palette,
                 args.color_mode,
                 args.camera_coordinates,
-                args.spoc_filename,
+                fn,
                 args.resolution,
                 args.box_mode);
 

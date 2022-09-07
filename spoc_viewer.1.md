@@ -8,7 +8,7 @@ spoc_viewer - view a LAS file
 
 # USAGE
 
-spoc_viewer [*options*] [*input_filename*]
+spoc_viewer [*options*] *input_filename* [*input_filename* ...]
 
 # DESCRIPTION
 

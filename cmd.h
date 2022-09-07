@@ -5,6 +5,7 @@
 #include <iostream>
 #include <stdexcept>
 #include <string>
+#include <vector>
 
 namespace spoc_viewer
 {
@@ -42,7 +43,7 @@ struct args
     bool verbose = false;
     float resolution = -1.0;
     std::string palette_filename;
-    std::string spoc_filename;
+    std::vector<std::string> spoc_filenames;
     std::string color_mode = "s";
     bool box_mode = false;
     std::string camera_coordinates;
@@ -97,11 +98,9 @@ args get_args (int argc, char **argv, const std::string &usage)
     if (optind == argc)
         throw std::runtime_error ("No SPOC filename was specified");
 
-    args.spoc_filename = argv[optind++];
-
-    // Check command line
-    if (optind != argc)
-        throw std::runtime_error ("Too many arguments on command line");
+    // Get the filenames
+    while (optind < argc)
+        args.spoc_filenames.push_back (argv[optind++]);
 
     return args;
 }
