@@ -31,18 +31,20 @@ int main (int argc, char **argv)
         {
             clog << boolalpha;
             clog << "spoc viewer version "
-                << spoc_viewer::MAJOR_VERSION
-                << spoc_viewer::MINOR_VERSION
+                << static_cast<int> (spoc_viewer::MAJOR_VERSION)
+                << "."
+                << static_cast<int> (spoc_viewer::MINOR_VERSION)
                 << std::endl;
             clog << "spoc version "
-                << spoc::MAJOR_VERSION
-                << spoc::MINOR_VERSION
+                << static_cast<int> (spoc::MAJOR_VERSION)
+                << "."
+                << static_cast<int> (spoc::MINOR_VERSION)
                 << std::endl;
             clog << "SPOC filenames " << args.spoc_filenames.size () << endl;
-            clog << "Palette_filename " << args.palette_filename << endl;
+            clog << "Palette_filename '" << args.palette_filename << "'" << endl;
             clog << "Resolution " << args.resolution << endl;
             clog << "Color_mode " << args.color_mode << endl;
-            clog << "Camera_coordinates " << args.camera_coordinates << endl;
+            clog << "Camera_coordinates '" << args.camera_coordinates << "'" << endl;
         }
 
         // Check the args
