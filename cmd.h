@@ -42,9 +42,9 @@ struct args
     bool help = false;
     bool verbose = false;
     float resolution = -1.0;
-    std::string palette_filename;
+    std::vector<std::string> palette_filenames;
     std::vector<std::string> spoc_filenames;
-    std::string color_mode = "s";
+    std::vector<std::string> color_modes;
     bool box_mode = false;
     std::string camera_coordinates;
     std::string screenshot_filename;
@@ -85,9 +85,9 @@ args get_args (int argc, char **argv, const std::string &usage)
                 return args;
             }
             case 'v': args.verbose = true; break;
-            case 'p': args.palette_filename = optarg; break;
+            case 'p': args.palette_filenames.push_back (optarg); break;
             case 'r': args.resolution = std::atof (optarg); break;
-            case 'c': args.color_mode = optarg; break;
+            case 'c': args.color_modes.push_back (optarg); break;
             case 'b': args.box_mode = true; break;
             case 'a': args.camera_coordinates = optarg; break;
             case 's': args.screenshot_filename = optarg; break;

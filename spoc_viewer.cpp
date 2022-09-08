@@ -1,4 +1,5 @@
 #include "cmd.h"
+#include "colors.h"
 #include "palette.h"
 #include "spoc/spoc.h"
 #include "version.h"
@@ -12,6 +13,7 @@ int main (int argc, char **argv)
 {
     using namespace std;
     using namespace spoc_viewer::cmd;
+    using namespace spoc_viewer::colors;
     using namespace spoc_viewer::palette;
     using namespace spoc::file;
     using namespace spoc::io;
@@ -41,59 +43,84 @@ int main (int argc, char **argv)
                 << static_cast<int> (spoc::MINOR_VERSION)
                 << std::endl;
             clog << "SPOC filenames " << args.spoc_filenames.size () << endl;
-            clog << "Palette_filename '" << args.palette_filename << "'" << endl;
+            for (auto f : args.spoc_filenames)
+                clog << "\t" << f << endl;
+            clog << "Palette_filenames " << args.palette_filenames.size ()<< endl;
+            for (auto p : args.palette_filenames)
+                clog << "\t" << p << endl;
+            clog << "Color_modes " << args.color_modes.size () << endl;
+            for (auto c : args.color_modes)
+                clog << "\t" << c << endl;
             clog << "Resolution " << args.resolution << endl;
-            clog << "Color_mode " << args.color_mode << endl;
             clog << "Camera_coordinates '" << args.camera_coordinates << "'" << endl;
-        }
-
-        // Check the args
-        if (args.color_mode.size () != 1)
-            throw runtime_error ("Unknown color-mode");
-
-        // Accept upper- or lower-case specification for color_mode
-        args.color_mode[0] = ::tolower (args.color_mode[0]);
-
-        // Get the palette
-        vector<rgb_triplet> palette;
-        if (!args.palette_filename.empty ())
-        {
-            // Read from specified file
-            palette = read_rgb_palette (args.palette_filename);
-        }
-        else
-        {
-            switch (args.color_mode[0])
-            {
-                default:
-                throw runtime_error ("Unknown color-mode");
-                case 's': // Classification shaded with intensity
-                case 'c': // Classification
-                palette = get_default_classification_palette ();
-                break;
-                case 'e': // Elevation
-                palette = get_default_elevation_palette ();
-                break;
-                case 'i': // Intensity
-                palette = get_default_intensity_palette ();
-                break;
-                case 'r': // Region
-                palette = get_default_region_palette ();
-                break;
-                case 'x': // Region
-                palette = get_default_region_palette_random ();
-                break;
-                case 'g': // RGB
-                palette = get_default_intensity_palette ();
-                break;
-            }
         }
 
         // The points to view
         point_records prs;
 
-        for (const auto &fn : args.spoc_filenames)
+        // The point colors
+        vector<rgb_triplet> rgbs;
+
+        // The current color mode
+        char color_mode = 'c';
+
+        // The current palette
+        vector<rgb_triplet> palette;
+
+        for (size_t n = 0; n < args.spoc_filenames.size (); ++n)
         {
+            // Get the filename
+            const auto fn = args.spoc_filenames[n];
+
+            // Get the color mode
+            if (n < args.color_modes.size ())
+            {
+                // Check the color mode
+                if (args.color_modes[n].size () != 1)
+                    throw runtime_error ("Invalid color-mode specification:" + args.color_modes[n]);
+
+                // Accept upper- or lower-case specification for color_mode
+                color_mode = ::tolower (args.color_modes[n][0]);
+            }
+
+            // Get the palette
+            if (n < args.palette_filenames.size ())
+            {
+                if (args.verbose)
+                    clog << "Reading palette " << args.palette_filenames[n] << endl;
+
+                // Read from specified file
+                palette = read_rgb_palette (args.palette_filenames[n]);
+            }
+            else
+            {
+                // Read the default palette for this color mode
+                switch (color_mode)
+                {
+                    default:
+                    throw runtime_error ("Unknown color-mode: " + color_mode);
+                    case 's': // Classification shaded with intensity
+                    case 'c': // Classification
+                    palette = get_default_classification_palette ();
+                    break;
+                    case 'e': // Elevation
+                    palette = get_default_elevation_palette ();
+                    break;
+                    case 'i': // Intensity
+                    palette = get_default_intensity_palette ();
+                    break;
+                    case 'r': // Region
+                    palette = get_default_region_palette ();
+                    break;
+                    case 'x': // Region
+                    palette = get_default_region_palette_random ();
+                    break;
+                    case 'g': // RGB
+                    palette = get_default_intensity_palette ();
+                    break;
+                }
+            }
+
             // Read the input file
             clog << "Reading " << fn << endl;
             ifstream ifs (fn);
@@ -105,6 +132,9 @@ int main (int argc, char **argv)
 
             if (args.verbose)
                 clog << f.get_point_records ().size () << " points read" << endl;
+
+            // Get the new point records
+            point_records new_prs;
 
             if (args.resolution > 0.0)
             {
@@ -119,29 +149,72 @@ int main (int argc, char **argv)
 
                 // Add them
                 for (auto i : indexes)
-                    prs.push_back (f.get_point_records ()[i]);
+                    new_prs.push_back (f.get_point_records ()[i]);
             }
             else
             {
                 // Move them out of the point cloud
-                const auto p = f.move_point_records ();
-
-                // Add them
-                prs.insert (prs.begin (), p.begin (), p.end ());
+                new_prs = f.move_point_records ();
             }
+
+            // Get RGB values for the new point records
+            assert (!palette.empty ());
+
+            if (args.verbose)
+                clog << "Getting colors for color mode '" << color_mode << "'" << endl;
+
+            // Get the colors for the new points
+            decltype(rgbs) new_rgbs;
+            switch (color_mode)
+            {
+                default:
+                throw std::runtime_error ("Unknown color-mode");
+                case 's': // Classification shaded with intensity
+                new_rgbs = get_shaded_classification_colors (new_prs, palette);
+                break;
+                case 'c': // Classification
+                new_rgbs = get_classification_colors (new_prs, palette);
+                break;
+                case 'e': // Elevation
+                new_rgbs = get_elevation_colors (new_prs, palette);
+                break;
+                case 'i': // Intensity
+                new_rgbs = get_intensity_colors (new_prs, palette);
+                break;
+                case 'r': // Region
+                new_rgbs = get_region_colors (new_prs, palette, spoc_viewer::palette::region_palette_indexer);
+                break;
+                case 'x': // Region
+                new_rgbs = get_region_colors_random (new_prs, palette);
+                break;
+                case 'g': // RGB
+                new_rgbs = get_rgb_colors (new_prs);
+                break;
+            }
+
+            // There should be one RGB per point
+            assert (new_prs.size () == new_rgbs.size ());
+
+            // Add the new point records
+            prs.insert (prs.end (), new_prs.begin (), new_prs.end ());
+
+            // Add the new RGB values
+            rgbs.insert (rgbs.end (), new_rgbs.begin (), new_rgbs.end ());
         }
 
         if (args.verbose)
             clog << "Total points " << prs.size () << endl;
+
+        // There should be one RGB per point
+        assert (prs.size () == rgbs.size ());
 
         const string fn = args.spoc_filenames.size () == 1
             ? args.spoc_filenames[0]
             : string ("...");
 
         // View them
-        vtk_interactor::start_interactor (prs,
-                palette,
-                args.color_mode,
+        spoc_viewer::vtk_interactor::start_interactor (prs,
+                rgbs,
                 args.camera_coordinates,
                 fn,
                 args.resolution,
