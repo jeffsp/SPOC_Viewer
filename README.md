@@ -1,7 +1,5 @@
+# SPOC Viewer
 
-- [] Colorization Support
-  - [ ] Transform classification to RGB
-  - [ ] Transform elevation to RGB
-  - [ ] Read palette
-  - [ ] Random palette=size
-  - [ ] Random seed
+VTK-based SPOC file viewer for Linux
+
+See the [SPOC file format](https://gitlab.com/jeffsp/spoc).
