@@ -238,6 +238,54 @@ std::vector<palette::rgb_triplet> get_rgb_colors (const T &pc)
     return rgbs;
 }
 
+/// @brief helper for setting point colors
+template<typename T,typename U>
+std::vector<palette::rgb_triplet> get_extra_field_colors (const T &pc, const U &palette, const size_t n)
+{
+    // Setup colors
+    assert (!palette.empty ());
+
+    std::vector<palette::rgb_triplet> rgbs;
+
+    if (pc.empty ())
+        return rgbs;
+
+    // Check the field
+    if (n > pc[0].extra.size ())
+        throw std::runtime_error ("This point cloud has no extra field #" + std::to_string(n));
+
+    // Set a sentinal
+    size_t min_x = pc[0].extra[n];
+    size_t max_x = pc[0].extra[n];
+
+    // Get min and max
+    for (const auto p : pc)
+    {
+        min_x = std::min (p.extra[n], min_x);
+        max_x = std::max (p.extra[n], max_x);
+    }
+
+    const size_t dx = max_x - min_x;
+
+    for (size_t i = 0; i < pc.size (); ++i)
+    {
+        // All extra fields should be the same size
+        assert (n < pc[i].extra.size ());
+        const double x = pc[i].extra[n] - min_x;
+        const unsigned index = dx == 0 ? 0 : round ((palette.size () - 1) * x / dx);
+        assert (index < palette.size ());
+        const unsigned r = palette[index][0];
+        const unsigned g = palette[index][1];
+        const unsigned b = palette[index][2];
+        assert (r < 256);
+        assert (g < 256);
+        assert (b < 256);
+        rgbs.push_back (palette::rgb_triplet {r, g, b});
+    }
+
+    return rgbs;
+}
+
 } // namespace colors
 
 } // namespace spoc_viewer

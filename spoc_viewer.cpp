@@ -118,6 +118,18 @@ int main (int argc, char **argv)
                     case 'g': // RGB
                     palette = get_default_intensity_palette ();
                     break;
+                    case '0': // Extra field
+                    case '1': // Extra field
+                    case '2': // Extra field
+                    case '3': // Extra field
+                    case '4': // Extra field
+                    case '5': // Extra field
+                    case '6': // Extra field
+                    case '7': // Extra field
+                    case '8': // Extra field
+                    case '9': // Extra field
+                    palette = get_default_elevation_palette ();
+                    break;
                 }
             }
 
@@ -189,6 +201,18 @@ int main (int argc, char **argv)
                 break;
                 case 'g': // RGB
                 new_rgbs = get_rgb_colors (new_prs);
+                break;
+                case '0': // Extra field
+                case '1': // Extra field
+                case '2': // Extra field
+                case '3': // Extra field
+                case '4': // Extra field
+                case '5': // Extra field
+                case '6': // Extra field
+                case '7': // Extra field
+                case '8': // Extra field
+                case '9': // Extra field
+                new_rgbs = get_extra_field_colors (new_prs, palette, color_mode - '0');
                 break;
             }
 
