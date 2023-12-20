@@ -242,7 +242,9 @@ int main (int argc, char **argv)
                 args.camera_coordinates,
                 fn,
                 args.resolution,
-                args.box_mode);
+                args.box_mode,
+                args.opacity,
+                args.point_size);
 
         return 0;
     }

@@ -48,6 +48,8 @@ struct args
     bool box_mode = false;
     std::string camera_coordinates;
     std::string screenshot_filename;
+    size_t point_size = 5;
+    float opacity = 1.0;
 };
 
 args get_args (int argc, char **argv, const std::string &usage)
@@ -65,10 +67,12 @@ args get_args (int argc, char **argv, const std::string &usage)
             {"box-mode", no_argument, 0,  'b' },
             {"camera-coordinates", required_argument, 0,  'a' },
             {"screenshot-filename", required_argument, 0,  's' },
+            {"opacity", required_argument, 0,  'o' },
+            {"point-size", required_argument, 0,  'i' },
             {0,      0,           0,  0 }
         };
 
-        int c = getopt_long(argc, argv, "hvp:r:c:ba:s:", long_options, &option_index);
+        int c = getopt_long(argc, argv, "hvp:r:c:ba:s:o:i:", long_options, &option_index);
         if (c == -1)
             break;
 
@@ -91,6 +95,8 @@ args get_args (int argc, char **argv, const std::string &usage)
             case 'b': args.box_mode = true; break;
             case 'a': args.camera_coordinates = optarg; break;
             case 's': args.screenshot_filename = optarg; break;
+            case 'o': args.opacity = std::atof (optarg); break;
+            case 'i': args.point_size = std::atoi (optarg); break;
         }
     }
 
