@@ -6,7 +6,7 @@ with open('class_palette.txt', 'rt') as pal_file:
 
 hex_colors = []
 for line in lines:
-    hex_colors.append('#' + line.strip())
+    hex_colors.append('#' + line.strip().strip('R"(').strip(')"'))
 
 fig, ax = plt.subplots(figsize=(6, 1))
 fig.subplots_adjust(bottom=0.5)
@@ -15,7 +15,10 @@ fig.subplots_adjust(bottom=0.5)
 cmap = mpl.colors.LinearSegmentedColormap.from_list("", hex_colors)
 
 # Set boundaries for discrete color segments
-bounds = range(len(hex_colors))  # Boundaries for each color
+ticks = range(len(hex_colors))  # tick marks
+bounds = [] # Boundries for each color
+for tick in ticks:
+    bounds.append(tick - 0.5)
 norm = mpl.colors.BoundaryNorm(bounds, cmap.N)
 
 cb2 = mpl.colorbar.ColorbarBase(
@@ -24,7 +27,7 @@ cb2 = mpl.colorbar.ColorbarBase(
    norm=norm,
    boundaries=bounds,  # Use the same boundaries for ticks
    extend='neither',  # No extension for discrete colors
-   ticks=bounds,
+   ticks=ticks,
    spacing='uniform',  # Uniform spacing for discrete colors
    orientation='horizontal'
 )

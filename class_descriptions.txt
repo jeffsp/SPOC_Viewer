@@ -26,3 +26,7 @@
 25, ducts
 26, aircraft
 27, solar panel array
+28, ???
+29, ???
+30, concrete pad
+31, fence

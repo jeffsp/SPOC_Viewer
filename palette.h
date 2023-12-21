@@ -1,13 +1,14 @@
 #ifndef PALETTE_H
 #define PALETTE_H
 
+#include <algorithm>
 #include <array>
 #include <cassert>
 #include <cmath>
 #include <fstream>
-#include <sstream>
 #include <iostream>
 #include <string>
+#include <sstream>
 #include <vector>
 
 namespace spoc_viewer
@@ -16,6 +17,10 @@ namespace spoc_viewer
 namespace palette
 {
 
+const char *class_palette =
+#include "class_palette.txt"
+;
+
 using rgb_triplet = std::array<unsigned,3>;
 using yuv_triplet = std::array<double,3>;
 
@@ -23,17 +28,12 @@ const std::string palette_path = "class_palette.txt";
 
 std::vector<rgb_triplet> get_default_classification_palette ()
 {
+    std::string file_contents (class_palette);
     std::vector<rgb_triplet> palette;
-    std::ifstream file(palette_path);
-
-
-    if (!file.is_open()) {
-        std::cerr << "Error: Could not open file '" << palette_path << "'" << std::endl;
-        return palette;  // Return an empty palette if file opening failed
-    }
+    std::stringstream file_ss(file_contents);
 
     std::string line;
-    while (std::getline(file, line)) {
+    while (std::getline(file_ss, line)) {
         // Remove any leading whitespace
         line.erase(line.begin(), std::find_if(line.begin(), line.end(), [](int ch) {
             return !std::isspace(ch);
