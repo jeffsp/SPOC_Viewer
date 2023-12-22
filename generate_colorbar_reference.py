@@ -31,6 +31,6 @@ cb2 = mpl.colorbar.ColorbarBase(
    spacing='uniform',  # Uniform spacing for discrete colors
    orientation='horizontal'
 )
-cb2.set_label('VIPER class color reference')
+cb2.set_label('Class color reference')
 fig.show()
 input('Press any key to close...')

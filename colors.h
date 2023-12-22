@@ -94,7 +94,6 @@ std::vector<palette::rgb_triplet> get_shaded_classification_colors (const T &pc,
 
     // Get the one at the 95% quantile boundary
     const double max_intensity = intensities[intensities.size () * 0.95];
-
     std::vector<palette::rgb_triplet> rgbs;
 
     // Setup colors
@@ -104,7 +103,7 @@ std::vector<palette::rgb_triplet> get_shaded_classification_colors (const T &pc,
         if (index >= palette.size ())
             index = 0;
         // Scale it by the intensity clamped to 1.0
-        const double scale = std::min (pc[i].i/ max_intensity, 0.5) + 0.5;
+        const double scale = std::min (pc[i].i/ max_intensity, 0.9) + 0.1;
         const unsigned r = palette[index][0];
         const unsigned g = palette[index][1];
         const unsigned b = palette[index][2];
@@ -115,7 +114,7 @@ std::vector<palette::rgb_triplet> get_shaded_classification_colors (const T &pc,
         assert (rgb[0] < 256);
         assert (rgb[1] < 256);
         assert (rgb[2] < 256);
-        rgbs.push_back (palette::rgb_triplet {r, g, b});
+        rgbs.push_back (rgb);
     }
 
     return rgbs;
