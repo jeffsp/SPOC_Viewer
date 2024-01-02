@@ -24,8 +24,9 @@ View a point cloud given a LAS file.
 
 --color-mode=*ARG*, -c *ARG*
 :   Set the color mode: *C*=classification mode, *E*=elevation mode,
-    *I*=intensity mode, *R*=region mode, *X*=random region mode, *G*=RGB
-    mode, *S*=classification shaded with intensity.
+    *I*=intensity mode, *R*=region mode, *X*=random region mode, *B*=RGB
+    mode, *S*=classification shaded with intensity, *G*=classification
+    shaded with green band.
 
 --box-mode, -b
 :   Set box mode to ON. In box mode, boxes will be drawn instead of

@@ -100,6 +100,7 @@ int main (int argc, char **argv)
                     default:
                     throw runtime_error ("Unknown color-mode: " + color_mode);
                     case 's': // Classification shaded with intensity
+                    case 'g': // Classification shaded with green band
                     case 'c': // Classification
                     palette = get_default_classification_palette ();
                     break;
@@ -115,7 +116,7 @@ int main (int argc, char **argv)
                     case 'x': // Region
                     palette = get_default_region_palette_random ();
                     break;
-                    case 'g': // RGB
+                    case 'b': // RGB
                     palette = get_default_intensity_palette ();
                     break;
                     case '0': // Extra field
@@ -199,7 +200,12 @@ int main (int argc, char **argv)
                 case 'x': // Region
                 new_rgbs = get_region_colors_random (new_prs, palette);
                 break;
-                case 'g': // RGB
+                case 'g': // Classification shaded with green, in case intensity doesn't exist (photogrammetry)
+                for (size_t i = 0; i < new_prs.size(); ++i)
+                    new_prs[i].i = new_prs[i].g;
+                new_rgbs = get_shaded_classification_colors (new_prs, palette);
+                break;
+                case 'b': // RGB
                 new_rgbs = get_rgb_colors (new_prs);
                 break;
                 case '0': // Extra field
