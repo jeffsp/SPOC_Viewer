@@ -86,15 +86,22 @@ std::vector<palette::rgb_triplet> get_shaded_classification_colors (const T &pc,
     // Put all intensities into a vector
     std::vector<uint16_t> intensities (pc.size ());
 
+    // Make sure there actually are intensity values
+    bool all_the_same = true;
     for (size_t i = 0; i < pc.size (); ++i)
+    {
         intensities[i] = pc[i].i;
+        if (intensities[i] != intensities[0])
+            all_the_same = false;
+    }
+    if (all_the_same)
+        throw std::runtime_error("All intensities are the same, so shaded classification colors will not work. Use the shaded with green option");
 
     // Sort by value
     sort (intensities.begin (), intensities.end ());
 
     // Get the one at the 95% quantile boundary
     const double max_intensity = intensities[intensities.size () * 0.95];
-
     std::vector<palette::rgb_triplet> rgbs;
 
     // Setup colors
@@ -104,7 +111,7 @@ std::vector<palette::rgb_triplet> get_shaded_classification_colors (const T &pc,
         if (index >= palette.size ())
             index = 0;
         // Scale it by the intensity clamped to 1.0
-        const double scale = std::min (pc[i].i/ max_intensity, 0.5) + 0.5;
+        const double scale = std::min (pc[i].i/ max_intensity, 0.9) + 0.1;
         const unsigned r = palette[index][0];
         const unsigned g = palette[index][1];
         const unsigned b = palette[index][2];
@@ -115,7 +122,7 @@ std::vector<palette::rgb_triplet> get_shaded_classification_colors (const T &pc,
         assert (rgb[0] < 256);
         assert (rgb[1] < 256);
         assert (rgb[2] < 256);
-        rgbs.push_back (palette::rgb_triplet {r, g, b});
+        rgbs.push_back (rgb);
     }
 
     return rgbs;

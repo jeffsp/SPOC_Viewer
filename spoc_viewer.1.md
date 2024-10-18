@@ -24,8 +24,9 @@ View a point cloud given a LAS file.
 
 --color-mode=*ARG*, -c *ARG*
 :   Set the color mode: *C*=classification mode, *E*=elevation mode,
-    *I*=intensity mode, *R*=region mode, *X*=random region mode, *G*=RGB
-    mode, *S*=classification shaded with intensity.
+    *I*=intensity mode, *R*=region mode, *X*=random region mode, *B*=RGB
+    mode, *S*=classification shaded with intensity, *G*=classification
+    shaded with green band.
 
 --box-mode, -b
 :   Set box mode to ON. In box mode, boxes will be drawn instead of
@@ -56,6 +57,14 @@ View a point cloud given a LAS file.
     specified, the image will be rendered (at the coordinates specified by
     the *camera-coordinates* argument, if provided), saved to the
     *filename* in PNG format, and then the application will exit.
+
+--opacity=*N*, -o *N*
+:   Set the opacity of the rendered points. Default is opacity=1.0,
+    i.e. not see through at all.
+
+--point-size=*N*, -i *N*
+:   Set the point size for the points when not rendering in box-mode.
+    default is point-size=5
 
 
 # USER INTERFACE
