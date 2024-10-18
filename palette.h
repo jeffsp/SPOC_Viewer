@@ -1,12 +1,14 @@
 #ifndef PALETTE_H
 #define PALETTE_H
 
+#include <algorithm>
 #include <array>
 #include <cassert>
 #include <cmath>
 #include <fstream>
 #include <iostream>
 #include <string>
+#include <sstream>
 #include <vector>
 
 namespace spoc_viewer
@@ -15,43 +17,45 @@ namespace spoc_viewer
 namespace palette
 {
 
+const char *class_palette =
+#include "class_palette.txt"
+;
+
 using rgb_triplet = std::array<unsigned,3>;
 using yuv_triplet = std::array<double,3>;
 
+const std::string palette_path = "class_palette.txt";
+
 std::vector<rgb_triplet> get_default_classification_palette ()
 {
-    std::vector<rgb_triplet> pal =
-    {
-        {0x00, 0x40, 0x40}, // 0
-        {0xff, 0x00, 0x00}, // 1, unclassified
-        {0x80, 0x40, 0x00}, // 2, ground
-        {0x00, 0xd5, 0x00}, // 3, low veg
-        {0x00, 0x80, 0x00}, // 4, med veg
-        {0x00, 0xc0, 0x00}, // 5, high veg
-        {0x00, 0xff, 0xff}, // 6, building
-        {0x80, 0x80, 0xc0}, // 7, low noise
-        {0x80, 0x80, 0x80}, // 8, high noise
-        {0x00, 0x00, 0xff}, // 9, water
-        {0x80, 0x80, 0x00}, // 10, rail
-        {0xc0, 0xc0, 0xc0}, // 11, road
-        {0x80, 0x80, 0x80}, // 12, bridge
-        {0xff, 0xff, 0x00}, // 13, wire
-        {0x00, 0x80, 0xc0}, // 14, unused
-        {0xff, 0xc8, 0xc0}, // 15, tower
-        {0xff, 0x80, 0xc0}, // 16, bad data
-        {0x40, 0x20, 0x00}, // 17, bridge
-        {0xff, 0x80, 0xc0}, // 18, high noise
-        {0xf3, 0x9e, 0x00}, // 19, vertical obstruction
-        {0x80, 0x40, 0x40}, // 20, below ground, non-noise
-        {0x80, 0x00, 0xff}, // 21, vehicles
-        {0x80, 0x80, 0x80}, // 22, misc-manmade
-        {0xff, 0x00, 0x80}, // 23, perimeter
-        {0x80, 0x00, 0x80}, // 24, urban elements
-        {0x00, 0x00, 0x80}, // 25, ducts
-        {0x80, 0x00, 0x80}, // 26, aircraft
-        {0x00, 0x00, 0xa0}, // 27, solar panel array
-    };
-    return pal;
+    std::string file_contents (class_palette);
+    std::vector<rgb_triplet> palette;
+    std::stringstream file_ss(file_contents);
+
+    std::string line;
+    while (std::getline(file_ss, line)) {
+        // Remove any leading whitespace
+        line.erase(line.begin(), std::find_if(line.begin(), line.end(), [](int ch) {
+            return !std::isspace(ch);
+        }));
+
+        std::stringstream ss(line);
+        std::string hex_color;
+        ss >> hex_color;
+
+        if (hex_color.length() != 6) {
+            std::cerr << "Warning: Invalid hex color '" << hex_color << "'" << std::endl;
+            continue;
+        }
+
+        unsigned r = std::stoul(hex_color.substr(0, 2), nullptr, 16);
+        unsigned g = std::stoul(hex_color.substr(2, 2), nullptr, 16);
+        unsigned b = std::stoul(hex_color.substr(4, 2), nullptr, 16);
+
+        palette.push_back({r, g, b});
+    }
+
+    return palette;
 }
 
 std::vector<rgb_triplet> get_default_elevation_palette ()
