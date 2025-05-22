@@ -106,8 +106,11 @@ void set_intensity_colors (T colors, const U &pc, const V &palette)
     // Sort by value
     sort (intensities.begin (), intensities.end ());
 
-    // Get the one at the 95% quantile boundary
-    const double max_intensity = intensities[intensities.size () * 0.95];
+    // Get the one at the 95% quantile boundary...
+    double max_intensity = intensities[intensities.size () * 0.95];
+
+    // ... but never go below a max intensity of 255
+    max_intensity = std::max (255.0, max_intensity);
 
     for (size_t i = 0; i < pc.size (); ++i)
     {
@@ -144,8 +147,11 @@ void set_shaded_classification_colors (T colors, const U &pc, const V &palette)
     // Sort by value
     sort (intensities.begin (), intensities.end ());
 
-    // Get the one at the 95% quantile boundary
-    const double max_intensity = intensities[intensities.size () * 0.95];
+    // Get the one at the 95% quantile boundary...
+    double max_intensity = intensities[intensities.size () * 0.95];
+
+    // ... but never go below a max intensity of 255
+    max_intensity = std::max (255.0, max_intensity);
 
     // Setup colors
     for (size_t i = 0; i < pc.size (); ++i)
