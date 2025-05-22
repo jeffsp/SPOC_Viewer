@@ -89,17 +89,6 @@ std::vector<palette::rgb_triplet> get_shaded_classification_colors (const T &pc,
     // Put all intensities into a vector
     std::vector<uint16_t> intensities (pc.size ());
 
-    // Make sure there actually are intensity values
-    bool all_the_same = true;
-    for (size_t i = 0; i < pc.size (); ++i)
-    {
-        intensities[i] = pc[i].i;
-        if (intensities[i] != intensities[0])
-            all_the_same = false;
-    }
-    if (all_the_same)
-        throw std::runtime_error("All intensities are the same, so shaded classification colors will not work. Use the shaded with green option");
-
     // Sort by value
     sort (intensities.begin (), intensities.end ());
 
