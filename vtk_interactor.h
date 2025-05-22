@@ -195,7 +195,9 @@ void start_interactor (const P pc,
         const std::string &camera_coordinates,
         const std::string &fn,
         const double resolution,
-        const bool box_mode)
+        const bool box_mode,
+        const float opacity,
+        const size_t point_size)
 {
     // There should be one RGB per point
     assert (pc.size () == rgbs.size ());
@@ -233,7 +235,7 @@ void start_interactor (const P pc,
     vtkSmartPointer<vtkPolyDataMapper> pcMapper = vtkSmartPointer<vtkPolyDataMapper>::New();
     vtkSmartPointer<vtkActor> pcActor = vtkSmartPointer<vtkActor>::New();
     pcActor->SetMapper(pcMapper);
-    pcActor->GetProperty()->SetOpacity(1.0);
+    pcActor->GetProperty()->SetOpacity(opacity);
 
     // Add the point cloud points
     if (box_mode)
@@ -253,7 +255,7 @@ void start_interactor (const P pc,
     }
     else
     {
-        pcActor->GetProperty()->SetPointSize(5);
+        pcActor->GetProperty()->SetPointSize(point_size);
         pcMapper->SetInputConnection(vertexFilter->GetOutputPort());
     }
 
