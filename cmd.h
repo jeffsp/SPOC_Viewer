@@ -43,7 +43,7 @@ struct args
     float resolution = -1.0;
     std::string palette_filename;
     std::string spoc_filename;
-    std::string color_mode = "s";
+    std::string color_mode = "c";
     bool box_mode = false;
     std::string camera_coordinates;
     std::string screenshot_filename;
